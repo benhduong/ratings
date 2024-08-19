@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Button,
-  Heading,
-  Flex,
-  View,
-  Grid,
-  Divider,
-} from "@aws-amplify/ui-react";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+import { Heading, Flex, View, Grid, Divider } from "@aws-amplify/ui-react";
 import { Amplify } from "aws-amplify";
 import "@aws-amplify/ui-react/styles.css";
 import { generateClient } from "aws-amplify/data";
@@ -18,20 +10,19 @@ import outputs from "../amplify_outputs.json";
 
 Amplify.configure(outputs);
 const client = generateClient({
-  authMode: "userPool",
+  authMode: "apiKey",
 });
 
 export default function App() {
-  const [userprofiles, setUserProfiles] = useState([]);
-  const { signOut } = useAuthenticator((context) => [context.user]);
+  const [entries, setRatingEntries] = useState([]);
 
   useEffect(() => {
-    fetchUserProfile();
+    fetchData();
   }, []);
 
-  async function fetchUserProfile() {
-    const { data: profiles } = await client.models.UserProfile.list();
-    setUserProfiles(profiles);
+  async function fetchData() {
+    const { data: entries } = await client.models.RatingEntry.list();
+    setRatingEntries(entries);
   }
 
   return (
@@ -54,9 +45,9 @@ export default function App() {
         gap="2rem"
         alignContent="center"
       >
-        {userprofiles.map((userprofile) => (
+        {entries.map((entry) => (
           <Flex
-            key={userprofile.id || userprofile.email}
+            key={entry.number || entry.name}
             direction="column"
             justifyContent="center"
             alignItems="center"
@@ -67,12 +58,11 @@ export default function App() {
             className="box"
           >
             <View>
-              <Heading level="3">{userprofile.email}</Heading>
+              <Heading level="3">{entry.name}</Heading>
             </View>
           </Flex>
         ))}
       </Grid>
-      <Button onClick={signOut}>Sign Out</Button>
     </Flex>
   );
 }
